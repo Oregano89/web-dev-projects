@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversational 3D Controller</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 3D Canvas -->
+        <div class="canvas-container">
+            <canvas id="threeCanvas"></canvas>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h2>3D Controller</h2>
+            
+            <!-- Speech Controls -->
+            <div class="speech-section">
+                <h3>Voice Commands</h3>
+                <button id="startSpeech" class="btn btn-primary">🎤 Start Listening</button>
+                <button id="stopSpeech" class="btn btn-secondary" disabled>⏹ Stop</button>
+                <div id="speechStatus" class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Ready</span>
+                </div>
+                <div id="recognizedText" class="recognized-text"></div>
+            </div>
+
+            <!-- Manual Controls -->
+            <div class="controls-section">
+                <h3>Manual Controls</h3>
+                
+                <div class="control-group">
+                    <label for="cameraDistance">Camera Distance: <span id="distanceValue">5</span></label>
+                    <input type="range" id="cameraDistance" min="2" max="20" value="5" step="0.1">
+                </div>
+
+                <div class="control-group">
+                    <label for="cameraRotation">Camera Rotation: <span id="rotationValue">0</span>°</label>
+                    <input type="range" id="cameraRotation" min="0" max="360" value="0" step="1">
+                </div>
+
+                <div class="control-group">
+                    <label for="cameraHeight">Camera Height: <span id="heightValue">5</span></label>
+                    <input type="range" id="cameraHeight" min="-10" max="10" value="5" step="0.1">
+                </div>
+
+                <div class="control-group">
+                    <label for="objectScale">Object Scale: <span id="scaleValue">1.0</span></label>
+                    <input type="range" id="objectScale" min="0.1" max="3" value="1" step="0.1">
+                </div>
+
+                <div class="control-group">
+                    <label for="rotationSpeed">Rotation Speed: <span id="speedValue">1.0</span></label>
+                    <input type="range" id="rotationSpeed" min="0" max="5" value="1" step="0.1">
+                </div>
+
+                <button id="resetCamera" class="btn btn-secondary">Reset Camera</button>
+            </div>
+
+            <!-- Command History -->
+            <div class="history-section">
+                <h3>Command History</h3>
+                <div id="commandHistory" class="command-history"></div>
+                <button id="clearHistory" class="btn btn-small">Clear History</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Three.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    
+    <!-- Project Scripts -->
+    <script src="scene.js"></script>
+    <script src="intentParser.js"></script>
+    <script src="speechRecognition.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
