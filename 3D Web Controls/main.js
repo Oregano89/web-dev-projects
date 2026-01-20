@@ -44,6 +44,57 @@ function setupUIListeners() {
         }
     });
     
+    // Parameter panel - Opacity
+    document.getElementById('opacitySlider').addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        sceneManager.setOpacity(value);
+        document.getElementById('opacityValue').textContent = value.toFixed(0);
+    });
+    
+    // Parameter panel - Threshold
+    document.getElementById('thresholdSlider').addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        sceneManager.setThreshold(value);
+        document.getElementById('thresholdValue').textContent = value.toFixed(0);
+    });
+    
+    // Parameter panel - ISO Value
+    document.getElementById('isoValueSlider').addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        sceneManager.setIsoValue(value);
+        document.getElementById('isoValueValue').textContent = value.toFixed(0);
+    });
+    
+    // Parameter panel - Brightness
+    document.getElementById('brightnessSlider').addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        sceneManager.setBrightness(value);
+        document.getElementById('brightnessValue').textContent = value.toFixed(0);
+    });
+    
+    // Parameter panel - Colormap
+    document.getElementById('colormapSelect').addEventListener('change', (e) => {
+        const colormapName = e.target.value;
+        sceneManager.setColormap(colormapName);
+        const displayName = colormapName.charAt(0).toUpperCase() + colormapName.slice(1);
+        document.getElementById('colormapName').textContent = displayName;
+    });
+    
+    // Preset buttons
+    document.getElementById('presetA').addEventListener('click', () => {
+        sceneManager.loadPreset('A');
+        updateUIValues();
+        updatePresetButtons('A');
+        addToHistory('Manual preset selection', 'Loaded Preset A');
+    });
+    
+    document.getElementById('presetB').addEventListener('click', () => {
+        sceneManager.loadPreset('B');
+        updateUIValues();
+        updatePresetButtons('B');
+        addToHistory('Manual preset selection', 'Loaded Preset B');
+    });
+    
     // Camera distance slider
     document.getElementById('cameraDistance').addEventListener('input', (e) => {
         const value = parseFloat(e.target.value);
@@ -83,6 +134,7 @@ function setupUIListeners() {
     document.getElementById('resetCamera').addEventListener('click', () => {
         sceneManager.reset();
         updateUIValues();
+        updatePresetButtons('A');
         addToHistory('Manual reset', 'Reset to defaults');
     });
     
@@ -174,6 +226,7 @@ function executeCommand(intent) {
             
         case 'reset':
             sceneManager.reset();
+            updatePresetButtons('A');
             result = 'Reset to defaults';
             break;
             
@@ -195,6 +248,91 @@ function executeCommand(intent) {
         case 'setScale':
             sceneManager.setObjectScale(value);
             result = `Set scale to ${value}`;
+            break;
+            
+        // Parameter control commands
+        case 'increaseOpacity':
+            sceneManager.setOpacity(sceneManager.opacity + 10);
+            result = `Increased opacity to ${sceneManager.opacity.toFixed(0)}%`;
+            break;
+            
+        case 'decreaseOpacity':
+            sceneManager.setOpacity(sceneManager.opacity - 10);
+            result = `Decreased opacity to ${sceneManager.opacity.toFixed(0)}%`;
+            break;
+            
+        case 'setOpacity':
+            // Handle both 0-1 and 0-100 ranges
+            const opacityVal = value > 1 ? value : value * 100;
+            sceneManager.setOpacity(opacityVal);
+            result = `Set opacity to ${sceneManager.opacity.toFixed(0)}%`;
+            break;
+            
+        case 'increaseIsoValue':
+            sceneManager.setIsoValue(sceneManager.isoValue + 20);
+            result = `Increased ISO to ${sceneManager.isoValue.toFixed(0)}`;
+            break;
+            
+        case 'decreaseIsoValue':
+            sceneManager.setIsoValue(sceneManager.isoValue - 20);
+            result = `Decreased ISO to ${sceneManager.isoValue.toFixed(0)}`;
+            break;
+            
+        case 'setIsoValue':
+            sceneManager.setIsoValue(value);
+            result = `Set ISO value to ${sceneManager.isoValue.toFixed(0)}`;
+            break;
+            
+        case 'increaseThreshold':
+            sceneManager.setThreshold(sceneManager.threshold + 10);
+            result = `Increased threshold to ${sceneManager.threshold.toFixed(0)}`;
+            break;
+            
+        case 'decreaseThreshold':
+            sceneManager.setThreshold(sceneManager.threshold - 10);
+            result = `Decreased threshold to ${sceneManager.threshold.toFixed(0)}`;
+            break;
+            
+        case 'setThreshold':
+            sceneManager.setThreshold(value);
+            result = `Set threshold to ${sceneManager.threshold.toFixed(0)}`;
+            break;
+            
+        case 'increaseBrightness':
+            sceneManager.setBrightness(sceneManager.brightness + 10);
+            result = `Increased brightness to ${sceneManager.brightness.toFixed(0)}%`;
+            break;
+            
+        case 'decreaseBrightness':
+            sceneManager.setBrightness(sceneManager.brightness - 10);
+            result = `Decreased brightness to ${sceneManager.brightness.toFixed(0)}%`;
+            break;
+            
+        case 'setBrightness':
+            sceneManager.setBrightness(value);
+            result = `Set brightness to ${sceneManager.brightness.toFixed(0)}%`;
+            break;
+            
+        case 'nextColormap':
+            sceneManager.nextColormap();
+            result = `Changed to ${sceneManager.currentColormap} colormap`;
+            break;
+            
+        case 'previousColormap':
+            sceneManager.previousColormap();
+            result = `Changed to ${sceneManager.currentColormap} colormap`;
+            break;
+            
+        case 'presetA':
+            sceneManager.loadPreset('A');
+            updatePresetButtons('A');
+            result = 'Loaded Preset A';
+            break;
+            
+        case 'presetB':
+            sceneManager.loadPreset('B');
+            updatePresetButtons('B');
+            result = 'Loaded Preset B';
             break;
             
         default:
@@ -247,6 +385,7 @@ function renderHistory() {
 
 // Update UI values to match scene state
 function updateUIValues() {
+    // Camera controls
     document.getElementById('cameraDistance').value = sceneManager.cameraDistance;
     document.getElementById('distanceValue').textContent = sceneManager.cameraDistance.toFixed(1);
     
@@ -261,6 +400,37 @@ function updateUIValues() {
     
     document.getElementById('rotationSpeed').value = sceneManager.rotationSpeed;
     document.getElementById('speedValue').textContent = sceneManager.rotationSpeed.toFixed(1);
+    
+    // Parameter panel controls
+    document.getElementById('opacitySlider').value = sceneManager.opacity;
+    document.getElementById('opacityValue').textContent = sceneManager.opacity.toFixed(0);
+    
+    document.getElementById('thresholdSlider').value = sceneManager.threshold;
+    document.getElementById('thresholdValue').textContent = sceneManager.threshold.toFixed(0);
+    
+    document.getElementById('isoValueSlider').value = sceneManager.isoValue;
+    document.getElementById('isoValueValue').textContent = sceneManager.isoValue.toFixed(0);
+    
+    document.getElementById('brightnessSlider').value = sceneManager.brightness;
+    document.getElementById('brightnessValue').textContent = sceneManager.brightness.toFixed(0);
+    
+    document.getElementById('colormapSelect').value = sceneManager.currentColormap;
+    const displayName = sceneManager.currentColormap.charAt(0).toUpperCase() + sceneManager.currentColormap.slice(1);
+    document.getElementById('colormapName').textContent = displayName;
+}
+
+// Update preset button states
+function updatePresetButtons(activePreset) {
+    const presetA = document.getElementById('presetA');
+    const presetB = document.getElementById('presetB');
+    
+    if (activePreset === 'A') {
+        presetA.classList.add('active');
+        presetB.classList.remove('active');
+    } else if (activePreset === 'B') {
+        presetA.classList.remove('active');
+        presetB.classList.add('active');
+    }
 }
 
 // Start application when DOM is ready

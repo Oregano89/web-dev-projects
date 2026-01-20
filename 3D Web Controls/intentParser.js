@@ -82,6 +82,83 @@ class IntentParser {
                 /freeze/i,
                 /pause/i,
                 /halt/i
+            ],
+            
+            // Opacity commands
+            increaseOpacity: [
+                /increase\s+opacity/i,
+                /more\s+opacity/i,
+                /less\s+transparent/i,
+                /opacity\s+up/i
+            ],
+            decreaseOpacity: [
+                /decrease\s+opacity/i,
+                /less\s+opacity/i,
+                /more\s+transparent/i,
+                /opacity\s+down/i
+            ],
+            
+            // ISO value commands
+            increaseIsoValue: [
+                /increase\s+iso/i,
+                /iso\s+up/i,
+                /raise\s+iso/i
+            ],
+            decreaseIsoValue: [
+                /decrease\s+iso/i,
+                /iso\s+down/i,
+                /lower\s+iso/i
+            ],
+            
+            // Threshold commands
+            increaseThreshold: [
+                /increase\s+threshold/i,
+                /threshold\s+up/i,
+                /raise\s+threshold/i
+            ],
+            decreaseThreshold: [
+                /decrease\s+threshold/i,
+                /threshold\s+down/i,
+                /lower\s+threshold/i
+            ],
+            
+            // Colormap commands
+            nextColormap: [
+                /next\s+colormap/i,
+                /change\s+colormap/i,
+                /switch\s+colormap/i,
+                /colormap\s+next/i
+            ],
+            previousColormap: [
+                /previous\s+colormap/i,
+                /last\s+colormap/i,
+                /colormap\s+previous/i
+            ],
+            
+            // Transfer function presets
+            presetA: [
+                /preset\s+a/i,
+                /transfer\s+function\s+a/i,
+                /use\s+preset\s+a/i,
+                /load\s+preset\s+a/i
+            ],
+            presetB: [
+                /preset\s+b/i,
+                /transfer\s+function\s+b/i,
+                /use\s+preset\s+b/i,
+                /load\s+preset\s+b/i
+            ],
+            
+            // Brightness commands
+            increaseBrightness: [
+                /increase\s+brightness/i,
+                /brighter/i,
+                /brightness\s+up/i
+            ],
+            decreaseBrightness: [
+                /decrease\s+brightness/i,
+                /darker/i,
+                /brightness\s+down/i
             ]
         };
     }
@@ -148,6 +225,50 @@ class IntentParser {
                 confidence: 1.0
             };
         }
+        
+        // Check for opacity commands like "opacity 0.5" or "set opacity to 75"
+        const opacityMatch = text.match(/(?:set\s+)?opacity\s+(?:to\s+)?(\d+(?:\.\d+)?)/i);
+        if (opacityMatch) {
+            return {
+                command: 'setOpacity',
+                value: parseFloat(opacityMatch[1]),
+                originalText: text,
+                confidence: 1.0
+            };
+        }
+        
+        // Check for threshold commands like "threshold 50" or "set threshold to 0.5"
+        const thresholdMatch = text.match(/(?:set\s+)?threshold\s+(?:to\s+)?(\d+(?:\.\d+)?)/i);
+        if (thresholdMatch) {
+            return {
+                command: 'setThreshold',
+                value: parseFloat(thresholdMatch[1]),
+                originalText: text,
+                confidence: 1.0
+            };
+        }
+        
+        // Check for ISO value commands like "iso 100" or "set iso to 200"
+        const isoMatch = text.match(/(?:set\s+)?iso(?:\s+value)?\s+(?:to\s+)?(\d+(?:\.\d+)?)/i);
+        if (isoMatch) {
+            return {
+                command: 'setIsoValue',
+                value: parseFloat(isoMatch[1]),
+                originalText: text,
+                confidence: 1.0
+            };
+        }
+        
+        // Check for brightness commands like "brightness 75" or "set brightness to 50"
+        const brightnessMatch = text.match(/(?:set\s+)?brightness\s+(?:to\s+)?(\d+(?:\.\d+)?)/i);
+        if (brightnessMatch) {
+            return {
+                command: 'setBrightness',
+                value: parseFloat(brightnessMatch[1]),
+                originalText: text,
+                confidence: 1.0
+            };
+        }
 
         return null;
     }
@@ -169,6 +290,22 @@ class IntentParser {
             setDistance: 'Set camera distance',
             setRotation: 'Set camera rotation',
             setScale: 'Set object scale',
+            increaseOpacity: 'Increase opacity',
+            decreaseOpacity: 'Decrease opacity',
+            setOpacity: 'Set opacity',
+            increaseIsoValue: 'Increase ISO value',
+            decreaseIsoValue: 'Decrease ISO value',
+            setIsoValue: 'Set ISO value',
+            increaseThreshold: 'Increase threshold',
+            decreaseThreshold: 'Decrease threshold',
+            setThreshold: 'Set threshold',
+            nextColormap: 'Next colormap',
+            previousColormap: 'Previous colormap',
+            presetA: 'Load preset A',
+            presetB: 'Load preset B',
+            increaseBrightness: 'Increase brightness',
+            decreaseBrightness: 'Decrease brightness',
+            setBrightness: 'Set brightness',
             unknown: 'Unknown command'
         };
         return descriptions[command] || command;

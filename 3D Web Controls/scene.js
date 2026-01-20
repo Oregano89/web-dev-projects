@@ -16,6 +16,25 @@ class SceneManager {
         this.objectScale = 1;
         this.rotationSpeed = 1;
         
+        // Render parameters
+        this.opacity = 50;
+        this.threshold = 50;
+        this.isoValue = 100;
+        this.brightness = 100;
+        this.currentColormap = 'viridis';
+        this.currentPreset = 'A';
+        
+        // Colormap definitions (color gradients)
+        this.colormaps = {
+            viridis: [0x440154, 0x31688e, 0x35b779, 0xfde724],
+            plasma: [0x0d0887, 0x7e03a8, 0xcc4778, 0xf89540, 0xf0f921],
+            inferno: [0x000004, 0x420a68, 0x932667, 0xdd513a, 0xfca50a, 0xfcffa4],
+            magma: [0x000004, 0x3b0f70, 0x8c2981, 0xde4968, 0xfe9f6d, 0xfcfdbf],
+            rainbow: [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x8b00ff],
+            cool: [0x00ffff, 0x0080ff, 0x0000ff],
+            warm: [0xffff00, 0xff8000, 0xff0000]
+        };
+        
         this.init();
     }
 
@@ -133,8 +152,105 @@ class SceneManager {
         this.cameraHeight = 5;
         this.objectScale = 1;
         this.rotationSpeed = 1;
+        this.opacity = 50;
+        this.threshold = 50;
+        this.isoValue = 100;
+        this.brightness = 100;
+        this.currentColormap = 'viridis';
+        this.currentPreset = 'A';
         this.updateCameraPosition();
         this.setObjectScale(1);
+        this.updateMaterialProperties();
+    }
+    
+    // Parameter control methods
+    setOpacity(value) {
+        this.opacity = Math.max(0, Math.min(100, value));
+        this.updateMaterialProperties();
+    }
+    
+    setThreshold(value) {
+        this.threshold = Math.max(0, Math.min(100, value));
+        this.updateMaterialProperties();
+    }
+    
+    setIsoValue(value) {
+        this.isoValue = Math.max(0, Math.min(255, value));
+        this.updateMaterialProperties();
+    }
+    
+    setBrightness(value) {
+        this.brightness = Math.max(0, Math.min(200, value));
+        this.updateMaterialProperties();
+    }
+    
+    setColormap(colormapName) {
+        if (this.colormaps[colormapName]) {
+            this.currentColormap = colormapName;
+            this.updateMaterialProperties();
+        }
+    }
+    
+    nextColormap() {
+        const colormapNames = Object.keys(this.colormaps);
+        const currentIndex = colormapNames.indexOf(this.currentColormap);
+        const nextIndex = (currentIndex + 1) % colormapNames.length;
+        this.setColormap(colormapNames[nextIndex]);
+    }
+    
+    previousColormap() {
+        const colormapNames = Object.keys(this.colormaps);
+        const currentIndex = colormapNames.indexOf(this.currentColormap);
+        const prevIndex = (currentIndex - 1 + colormapNames.length) % colormapNames.length;
+        this.setColormap(colormapNames[prevIndex]);
+    }
+    
+    loadPreset(presetName) {
+        this.currentPreset = presetName;
+        if (presetName === 'A') {
+            // Preset A: Bright, high contrast
+            this.setOpacity(75);
+            this.setThreshold(30);
+            this.setIsoValue(150);
+            this.setBrightness(120);
+            this.setColormap('viridis');
+        } else if (presetName === 'B') {
+            // Preset B: Soft, low contrast
+            this.setOpacity(40);
+            this.setThreshold(70);
+            this.setIsoValue(80);
+            this.setBrightness(90);
+            this.setColormap('plasma');
+        }
+    }
+    
+    updateMaterialProperties() {
+        if (!this.mainObject) return;
+        
+        const material = this.mainObject.material;
+        
+        // Apply opacity
+        material.opacity = this.opacity / 100;
+        material.transparent = this.opacity < 100;
+        
+        // Apply brightness by modifying emissive intensity
+        const brightnessMultiplier = this.brightness / 100;
+        material.emissiveIntensity = Math.max(0, brightnessMultiplier - 1);
+        
+        // Apply colormap - use primary color from colormap
+        const colormapColors = this.colormaps[this.currentColormap];
+        if (colormapColors && colormapColors.length > 0) {
+            const colorIndex = Math.floor((this.threshold / 100) * (colormapColors.length - 1));
+            const selectedColor = colormapColors[colorIndex];
+            material.color.setHex(selectedColor);
+            material.emissive.setHex(selectedColor);
+        }
+        
+        // ISO value affects metalness
+        material.metalness = this.isoValue / 255;
+        
+        // Threshold affects roughness
+        material.roughness = 1 - (this.threshold / 100);
     }
 
     onWindowResize() {
